@@ -1,0 +1,113 @@
+doctype html
+html(lang='en')
+  head
+    title three.js webgl - controls - deviceorientation
+    meta(charset='utf-8')
+    meta(name='viewport', content='user-scalable=no, initial-scale=1')
+    style.
+      body {
+      margin: 0px;
+      background-color: #000000;
+      overflow: hidden;
+      }
+      #info {
+      position: absolute;
+      bottom: 0px;
+      width: 100%;
+      color: #ffffff;
+      padding: 5px;
+      font-family:Monospace;
+      font-size:13px;
+      font-weight: bold;
+      text-align:center;
+      background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.51) 22%, rgba(0,0,0,0.65) 28%, rgba(0,0,0,0.65) 100%); /* FF3.6+ */
+      background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0)), color-stop(22%,rgba(0,0,0,0.51)), color-stop(28%,rgba(0,0,0,0.65)), color-stop(100%,rgba(0,0,0,0.65))); /* Chrome,Safari4+ */
+      background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.51) 22%,rgba(0,0,0,0.65) 28%,rgba(0,0,0,0.65) 100%); /* Chrome10+,Safari5.1+ */
+      background: -o-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.51) 22%,rgba(0,0,0,0.65) 28%,rgba(0,0,0,0.65) 100%); /* Opera 11.10+ */
+      background: -ms-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.51) 22%,rgba(0,0,0,0.65) 28%,rgba(0,0,0,0.65) 100%); /* IE10+ */
+      background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.51) 22%,rgba(0,0,0,0.65) 28%,rgba(0,0,0,0.65) 100%); /* W3C */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#a6000000',GradientType=0 ); /* IE6-9 */
+      }
+      a {
+      color: #ff8800;
+      }
+  body
+    #container
+    #info housing
+    script(src='http://code.jquery.com/jquery-latest.min.js', type='text/javascript')
+    script(src='http://www.freeptools.com/mapster/js/three.min.js')
+    script(src='http://www.freeptools.com/mapster/js/controls/DeviceOrientationControls.js')
+    script(src='http://www.freeptools.com/mapster/js/effects/StereoEffect.js')
+    script(src='http://www.freeptools.com/mapster/js/renderers/Projector.js')
+    script(src='http://www.freeptools.com/mapster/js/renderers/CanvasRenderer.js')
+    script.
+      (function() {
+      "use strict"
+      var container, camera, scene, renderer, controls, geometry, mesh, effect;
+      var windowHalfX = window.innerWidth;
+      var windowHalfY = window.innerHeight;
+      var lon = 413;
+      var lat = -19;
+      var phi = 0;
+      var theta = 0;
+      var alpha = 0;
+      var beta = 0;
+      var gamma = 0;
+      window.addEventListener('load', function() {
+      var animate = function(){
+      window.requestAnimationFrame( animate );
+      if((alpha === 0 || alpha == null) && (beta === 0 || beta == null) && (gamma === 0 || gamma == null)) {
+      render();
+      }
+      else{
+      controls.update();
+      }
+      //see if we're in sbs mode
+      renderer.render(scene, camera);
+      };
+      container = document.getElementById('container');
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
+      controls = new THREE.DeviceOrientationControls( camera );
+      scene = new THREE.Scene();
+      var geometry = new THREE.SphereGeometry( 500, 60, 40 );
+      geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+      var material = new THREE.MeshBasicMaterial( {
+      map: THREE.ImageUtils.loadTexture("/img/testimg.jpg")
+      });
+      var mesh = new THREE.Mesh( geometry, material );
+      scene.add( mesh );
+      //renderer = new THREE.CanvasRenderer();
+      renderer = new THREE.WebGLRenderer();
+      renderer.setPixelRatio( window.devicePixelRatio );
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.domElement.style.position = 'absolute';
+      renderer.domElement.style.top = 0;
+      container.appendChild(renderer.domElement);
+      window.addEventListener('resize', function() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      }, false);
+      window.addEventListener( 'mousemove', onDocumentMouseMove, false );
+      window.addEventListener( 'deviceorientation', onDeviceOrientationChangeEvent, false );
+      animate();
+      }, false);
+      function onDocumentMouseMove(event) {
+      lon = ( event.clientX - (window.innerWidth / 2)) * .33;
+      lat = ( event.clientY - (window.innerHeight / 2)) * .5;
+      }
+      function onDeviceOrientationChangeEvent( event ) {
+      alpha = event.alpha;
+      beta = event.beta;
+      gamma = event.gamma;
+      }
+      function render() {
+      lat = Math.max( - 85, Math.min( 85, lat ) );
+      phi = THREE.Math.degToRad( 90 - lat );
+      theta = THREE.Math.degToRad( lon );
+      camera.position.x = 100 * Math.sin( phi ) * Math.cos( theta );
+      camera.position.y = 100 * Math.cos( phi );
+      camera.position.z = 100 * Math.sin( phi ) * Math.sin( theta );
+      camera.lookAt( scene.position );
+      }
+      })();
