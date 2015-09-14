@@ -1,4 +1,41 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+module.exports = { "default": require("core-js/library/fn/object/define-property"), __esModule: true };
+},{"core-js/library/fn/object/define-property":5}],2:[function(require,module,exports){
+"use strict";
+
+exports["default"] = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+exports.__esModule = true;
+},{}],3:[function(require,module,exports){
+"use strict";
+
+var _Object$defineProperty = require("babel-runtime/core-js/object/define-property")["default"];
+
+exports["default"] = (function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+
+      _Object$defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+})();
+
+exports.__esModule = true;
+},{"babel-runtime/core-js/object/define-property":1}],4:[function(require,module,exports){
 "use strict";
 
 exports["default"] = function (obj) {
@@ -8,7 +45,26 @@ exports["default"] = function (obj) {
 };
 
 exports.__esModule = true;
-},{}],2:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
+var $ = require('../../modules/$');
+module.exports = function defineProperty(it, key, desc){
+  return $.setDesc(it, key, desc);
+};
+},{"../../modules/$":6}],6:[function(require,module,exports){
+var $Object = Object;
+module.exports = {
+  create:     $Object.create,
+  getProto:   $Object.getPrototypeOf,
+  isEnum:     {}.propertyIsEnumerable,
+  getDesc:    $Object.getOwnPropertyDescriptor,
+  setDesc:    $Object.defineProperty,
+  setDescs:   $Object.defineProperties,
+  getKeys:    $Object.keys,
+  getNames:   $Object.getOwnPropertyNames,
+  getSymbols: $Object.getOwnPropertySymbols,
+  each:       [].forEach
+};
+},{}],7:[function(require,module,exports){
 var self = self || {};// File:src/Three.js
 
 /**
@@ -35156,7 +35212,7 @@ if (typeof exports !== 'undefined') {
   this['THREE'] = THREE;
 }
 
-},{}],3:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -35165,99 +35221,121 @@ var _p360 = require('./p360');
 
 var _p3602 = _interopRequireDefault(_p360);
 
-var img = (0, _p3602['default'])('/img/testimg.jpg');
+var image = new _p3602['default']();
+image.drawImage('/img/testimg.jpg');
 
-},{"./p360":4,"babel-runtime/helpers/interop-require-default":1}],4:[function(require,module,exports){
+},{"./p360":9,"babel-runtime/helpers/interop-require-default":4}],9:[function(require,module,exports){
 'use strict';
+
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
+
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-exports['default'] = p360;
 
 var _three = require('three');
 
 var _three2 = _interopRequireDefault(_three);
 
-var container, camera, scene, renderer, controls, geometry, mesh, effect;
-var windowHalfX = window.innerWidth;
-var windowHalfY = window.innerHeight;
-var lon = 413;
-var lat = -19;
-var phi = 0;
-var theta = 0;
-var alpha = 0;
-var beta = 0;
-var gamma = 0;
+var p360 = (function () {
+  function p360() {
+    var _this = this;
 
-function p360(imgUrl) {
-  var animate = function animate() {
-    window.requestAnimationFrame(animate);
-    if ((alpha === 0 || alpha == null) && (beta === 0 || beta == null) && (gamma === 0 || gamma == null)) {
-      render();
-    } else {}
-    //controls.update();
+    _classCallCheck(this, p360);
 
-    //see if we're in sbs mode
-    renderer.render(scene, camera);
-  };
+    this.animate = function () {
+      window.requestAnimationFrame(_this.animate);
+      if ((_this.alpha === 0 || _this.alpha == null) && (_this.beta === 0 || _this.beta == null) && (_this.gamma === 0 || _this.gamma == null)) {
+        _this.render();
+      } else {}
+      //controls.update();
 
-  container = document.getElementById('container');
-  camera = new _three2['default'].PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
-  //controls = new THREE.DeviceOrientationControls( camera );
-  scene = new _three2['default'].Scene();
-  var geometry = new _three2['default'].SphereGeometry(500, 60, 40);
-  geometry.applyMatrix(new _three2['default'].Matrix4().makeScale(-1, 1, 1));
-  var material = new _three2['default'].MeshBasicMaterial({
-    map: _three2['default'].ImageUtils.loadTexture(imgUrl)
-  });
-  var mesh = new _three2['default'].Mesh(geometry, material);
-  scene.add(mesh);
-  //renderer = new THREE.CanvasRenderer();
-  renderer = new _three2['default'].WebGLRenderer();
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.domElement.style.position = 'absolute';
-  renderer.domElement.style.top = 0;
-  container.appendChild(renderer.domElement);
+      //see if we're in sbs mode
+      _this.renderer.render(_this.scene, _this.camera);
+    };
 
-  window.addEventListener('resize', function () {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }, false);
-  window.addEventListener('mousemove', onDocumentMouseMove, false);
-  window.addEventListener('deviceorientation', onDeviceOrientationChangeEvent, false);
-  animate();
-}
+    this.mouseMove = function (event) {
+      _this.lon = (event.clientX - window.innerWidth / 2) * .33;
+      _this.lat = (event.clientY - window.innerHeight / 2) * .5;
+    };
 
-;
+    this.deviceOrientationChange = function (event) {
+      _this.alpha = event.alpha;
+      _this.beta = event.beta;
+      _this.gamma = event.gamma;
+    };
 
-function onDocumentMouseMove(event) {
-  lon = (event.clientX - window.innerWidth / 2) * .33;
-  lat = (event.clientY - window.innerHeight / 2) * .5;
-}
+    this.render = function () {
+      _this.lat = Math.max(-85, Math.min(85, _this.lat));
+      _this.phi = _three2['default'].Math.degToRad(90 - _this.lat);
+      _this.theta = _three2['default'].Math.degToRad(_this.lon);
+      _this.camera.position.x = 100 * Math.sin(_this.phi) * Math.cos(_this.theta);
+      _this.camera.position.y = 100 * Math.cos(_this.phi);
+      _this.camera.position.z = 100 * Math.sin(_this.phi) * Math.sin(_this.theta);
+      _this.camera.lookAt(_this.scene.position);
+    };
 
-function onDeviceOrientationChangeEvent(event) {
-  alpha = event.alpha;
-  beta = event.beta;
-  gamma = event.gamma;
-}
+    this.lon = 413;
+    this.lat = -19;
 
-function render() {
-  lat = Math.max(-85, Math.min(85, lat));
-  phi = _three2['default'].Math.degToRad(90 - lat);
-  theta = _three2['default'].Math.degToRad(lon);
-  camera.position.x = 100 * Math.sin(phi) * Math.cos(theta);
-  camera.position.y = 100 * Math.cos(phi);
-  camera.position.z = 100 * Math.sin(phi) * Math.sin(theta);
-  camera.lookAt(scene.position);
-}
+    this.phi = 0;
+    this.theta = 0;
+
+    this.alpha = 0;
+    this.beta = 0;
+    this.gamma = 0;
+
+    this.container;
+    this.camera;
+    this.scene;
+    this.renderer;
+  }
+
+  _createClass(p360, [{
+    key: 'drawImage',
+    value: function drawImage(imgUrl) {
+
+      this.container = document.getElementById('container');
+      this.camera = new _three2['default'].PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
+      //controls = new THREE.DeviceOrientationControls( this.camera );
+      this.scene = new _three2['default'].Scene();
+      var geometry = new _three2['default'].SphereGeometry(500, 60, 40);
+      geometry.applyMatrix(new _three2['default'].Matrix4().makeScale(-1, 1, 1));
+      var material = new _three2['default'].MeshBasicMaterial({
+        map: _three2['default'].ImageUtils.loadTexture(imgUrl)
+      });
+      var mesh = new _three2['default'].Mesh(geometry, material);
+      this.scene.add(mesh);
+      //renderer = new THREE.CanvasRenderer();
+      this.renderer = new _three2['default'].WebGLRenderer();
+      this.renderer.setPixelRatio(window.devicePixelRatio);
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.domElement.style.position = 'absolute';
+      this.renderer.domElement.style.top = 0;
+      this.container.appendChild(this.renderer.domElement);
+
+      window.addEventListener('resize', function () {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+      }, false);
+      window.addEventListener('mousemove', this.mouseMove, false);
+      window.addEventListener('deviceorientation', this.deviceOrientationChange, false);
+      this.animate();
+    }
+  }]);
+
+  return p360;
+})();
+
+exports['default'] = p360;
 module.exports = exports['default'];
 
-},{"babel-runtime/helpers/interop-require-default":1,"three":2}]},{},[3])
+},{"babel-runtime/helpers/class-call-check":2,"babel-runtime/helpers/create-class":3,"babel-runtime/helpers/interop-require-default":4,"three":7}]},{},[8])
 
 
 //# sourceMappingURL=app.js.map

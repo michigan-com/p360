@@ -1,76 +1,87 @@
 import THREE from 'three';
 
-var container, camera, scene, renderer, controls, geometry, mesh, effect;
-var windowHalfX = window.innerWidth;
-var windowHalfY = window.innerHeight;
-var lon = 413;
-var lat = -19;
-var phi = 0;
-var theta = 0;
-var alpha = 0;
-var beta = 0;
-var gamma = 0;
+export default class p360 {
+  constructor() {
+    this.lon = 413;
+    this.lat = -19;
 
-export default function p360(imgUrl) {
-  var animate = function(){
-    window.requestAnimationFrame( animate );
-    if((alpha === 0 || alpha == null) && (beta === 0 || beta == null) && (gamma === 0 || gamma == null)) {
-      render();
+    this.phi = 0;
+    this.theta = 0;
+
+    this.alpha = 0;
+    this.beta = 0;
+    this.gamma = 0;
+
+    this.container;
+    this.camera;
+    this.scene;
+    this.renderer;
+  }
+
+  drawImage(imgUrl) {
+
+    this.container = document.getElementById('container');
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
+    //controls = new THREE.DeviceOrientationControls( this.camera );
+    this.scene = new THREE.Scene();
+    var geometry = new THREE.SphereGeometry( 500, 60, 40 );
+    geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+    var material = new THREE.MeshBasicMaterial( {
+      map: THREE.ImageUtils.loadTexture(imgUrl)
+    });
+    var mesh = new THREE.Mesh( geometry, material );
+    this.scene.add( mesh );
+    //renderer = new THREE.CanvasRenderer();
+    this.renderer = new THREE.WebGLRenderer();
+    this.renderer.setPixelRatio( window.devicePixelRatio );
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.domElement.style.position = 'absolute';
+    this.renderer.domElement.style.top = 0;
+    this.container.appendChild(this.renderer.domElement);
+
+    window.addEventListener('resize', function() {
+      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize( window.innerWidth, window.innerHeight );
+    }, false);
+    window.addEventListener( 'mousemove', this.mouseMove, false );
+    window.addEventListener( 'deviceorientation', this.deviceOrientationChange, false );
+    this.animate();
+  }
+
+  animate = () => {
+    window.requestAnimationFrame( this.animate );
+    if((this.alpha === 0 || this.alpha == null) &&
+       (this.beta === 0 || this.beta == null) &&
+        (this.gamma === 0 || this.gamma == null)) {
+      this.render();
     }
     else{
       //controls.update();
     }
     //see if we're in sbs mode
-    renderer.render(scene, camera);
+    this.renderer.render(this.scene, this.camera);
   };
 
-  container = document.getElementById('container');
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
-  //controls = new THREE.DeviceOrientationControls( camera );
-  scene = new THREE.Scene();
-  var geometry = new THREE.SphereGeometry( 500, 60, 40 );
-  geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
-  var material = new THREE.MeshBasicMaterial( {
-    map: THREE.ImageUtils.loadTexture(imgUrl)
-  });
-  var mesh = new THREE.Mesh( geometry, material );
-  scene.add( mesh );
-  //renderer = new THREE.CanvasRenderer();
-  renderer = new THREE.WebGLRenderer();
-  renderer.setPixelRatio( window.devicePixelRatio );
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.domElement.style.position = 'absolute';
-  renderer.domElement.style.top = 0;
-  container.appendChild(renderer.domElement);
+  mouseMove = (event) => {
+    this.lon = ( event.clientX - (window.innerWidth / 2)) * .33;
+    this.lat = ( event.clientY - (window.innerHeight / 2)) * .5;
+  }
 
-  window.addEventListener('resize', function() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-  }, false);
-  window.addEventListener( 'mousemove', onDocumentMouseMove, false );
-  window.addEventListener( 'deviceorientation', onDeviceOrientationChangeEvent, false );
-  animate();
-};
+  deviceOrientationChange = (event) => {
+    this.alpha = event.alpha;
+    this.beta = event.beta;
+    this.gamma = event.gamma;
+  }
 
-function onDocumentMouseMove(event) {
-  lon = ( event.clientX - (window.innerWidth / 2)) * .33;
-  lat = ( event.clientY - (window.innerHeight / 2)) * .5;
-}
-
-function onDeviceOrientationChangeEvent( event ) {
-  alpha = event.alpha;
-  beta = event.beta;
-  gamma = event.gamma;
-}
-
-function render() {
-  lat = Math.max( - 85, Math.min( 85, lat ) );
-  phi = THREE.Math.degToRad( 90 - lat );
-  theta = THREE.Math.degToRad( lon );
-  camera.position.x = 100 * Math.sin( phi ) * Math.cos( theta );
-  camera.position.y = 100 * Math.cos( phi );
-  camera.position.z = 100 * Math.sin( phi ) * Math.sin( theta );
-  camera.lookAt( scene.position );
+  render = () => {
+    this.lat = Math.max( - 85, Math.min( 85, this.lat ) );
+    this.phi = THREE.Math.degToRad( 90 - this.lat );
+    this.theta = THREE.Math.degToRad( this.lon );
+    this.camera.position.x = 100 * Math.sin( this.phi ) * Math.cos( this.theta );
+    this.camera.position.y = 100 * Math.cos( this.phi );
+    this.camera.position.z = 100 * Math.sin( this.phi ) * Math.sin( this.theta );
+    this.camera.lookAt( this.scene.position );
+  }
 }
 
