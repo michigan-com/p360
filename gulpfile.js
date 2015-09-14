@@ -18,8 +18,8 @@ var source = require('vinyl-source-stream');
 var each = require('lodash/collection/forEach');
 var browserifyShim = require('browserify-shim');
 
-var jsSrc = './public/js/src/';
-var jsBundle = ['test_socket.js'];
+var jsSrc = './src/client/';
+var jsBundle = ['app.js'];
 
 var testFiles = './dist/tests/**/*.js';
 
@@ -64,7 +64,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('babel', function() {
-  var src = './src/**/*.js';
+  var src = './src/server/**/*.js';
   var dist = './dist';
 
   gutil.log('Babel is generating ' + src + ' files to ' + dist + ' ...');
@@ -88,7 +88,7 @@ gulp.task('test', ['babel'], function() {
 
 function bundlejs(file, bcb, src, dist) {
   if (typeof src === 'undefined') src = jsSrc;
-  if (typeof dist === 'undefined') dist = './public/js/dist/';
+  if (typeof dist === 'undefined') dist = './public/js/';
 
   var srcFull = src + file;
   var distFull = dist + file;
@@ -103,7 +103,7 @@ function bundlejs(file, bcb, src, dist) {
   var b = browserify(srcFull, { debug: true });
   return b
     .transform(babelify.configure({ stage: 0, optional: ['runtime'] }))
-    .transform(browserifyShim, { global: true })
+    //.transform(browserifyShim, { global: true })
     .bundle()
     .pipe(source(file))
     .pipe(buffer())
